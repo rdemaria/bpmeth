@@ -17,7 +17,7 @@ madx.use("elena")
 
 
 # ELENA model in XSuite
-line_mad = xt.Line.from_madx_sequence(madx.sequence.elena)
+line_mad = xt.Line.from_madx_sequence(madx.sequence.elena,deferred_expressions=True)
 start_elem = "lnr.vvgbf.0114"
 line_mad.cycle(name_first_element=start_elem, inplace=True)  # Such that dipole is not spanning over end-beginning of lattice
 line_mad.particle_ref = xt.Particles(p0c=0.1, mass0=0.938272, q0=1)
@@ -72,6 +72,17 @@ dipole_splines.fieldmap.z_multipoles(2, ax=ax)
 dipole_model_FS.plot_components(smin=-0.5, smax=0.5, s_shift=-l_magn/2, ax=ax)
 
 
+
+vp=bpmeth.GeneralVectorPotential(b=[f"{dipole_h}"],hs=f"{dipole_h}")
+mbh=bpmeth.Hamiltonian(vectp=vp,length=l_magn,curv=dipole_h)
+mentry=xt.Bend(length=0,k0=dipole_h,edge_exit_active=0,
+              edge_entry_model="full",edge_entry_fint=0.424,edge_entry_hgap=gap/2,
+              edge_entry_angle=line_mad.vv['lnr_abmh'])
+mexit=xt.Bend(length=0,k0=dipole_h,edge_entry_active=0,
+              edge_exit_model="full",edge_exit_fint=0.424,edge_exit_hgap=gap/2,
+              edge_exit_angle=line_mad.vv['lnr_abmh'])
+
+
 # Line with replaced dipoles with sextupole component
 line_splines = line_mad.copy()
 for dipole_number in ["0135", "0245", "0335", "0470", "0560", "0640"]:
@@ -79,8 +90,11 @@ for dipole_number in ["0135", "0245", "0335", "0470", "0560", "0640"]:
     line_splines.remove(f"lnr.mbhek.{dipole_number}.h1")
     line_splines.remove(f"lnr.mbhek.{dipole_number}.m")
     line_splines.remove(f"lnr.mbhek.{dipole_number}.h2")
-    line_splines.insert(f"spline_{dipole_number}", dipole_splines, at=dipole_s)
+    line_splines.insert(f"spline_{dipole_number}", mbh, at=dipole_s)
+    line_splines.insert(f"entry_{dipole_number}", mentry, at=dipole_s-l_magn/2)
+    line_splines.insert(f"exit_{dipole_number}", mexit, at=dipole_s+l_magn/2)
 tw_splines = line_splines.twiss4d(include_collective=True)
+
 
 # Line with replaced dipoles without sextupole component
 line_splines_without_sext = line_mad.copy()

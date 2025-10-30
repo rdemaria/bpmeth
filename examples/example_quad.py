@@ -32,9 +32,24 @@ plt.plot(ss, poly_fit.poly_val(poly_entry, ss))
 b1 = "0.0"  # k0
 b2 = poly_fit.poly_print(poly_entry, x="s")  # k1
 b3 = "0.0"  # k2
+a1 = "0.0"  # ks0
+a2 = -eval(bs,{'s':A_magnet_entry.s}).diff(A_magnet_entry.s)/2  # ks1
+a3 = "0.0"  # ks2
 h = "0.0"
-length = s[-1]
-A_magnet_entry = bpmeth.GeneralVectorPotential(hs=h, b=(b1, b2, b3))
+length = 2
+A_magnet_entry = bpmeth.GeneralVectorPotential(hs=h, b=(b1, b2, b3),a=(a1, a2, a3))
+x=A_magnet_entry.x
+y=A_magnet_entry.y
+s=A_magnet_entry.s
+
+Bx_np,By_np,Bs_np=A_magnet_entry.get_Bfield()
+Bx_sp,By_sp,Bs_sp=A_magnet_entry.get_Bfield(lambdify=False)
+import sympy
+(xx, yy)=sympy.var('xx,yy')
+
+(Bx_sp.subs({x:yy, y:xx})-By_sp.subs({x:xx, y:yy})).simplify()
+
+
 H_magnet_entry = bpmeth.Hamiltonian(length=length, curv=float(h), vectp=A_magnet_entry)
 
 # Body

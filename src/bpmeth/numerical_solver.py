@@ -57,7 +57,8 @@ class Hamiltonian:
         if lambdify:
             qp = (x, y, tau, px, py, ptau)
             s = coords.s
-            return sp.lambdify((s, qp, beta0), qpdot, modules="numpy")
+            import numba
+            return numba.jit(sp.lambdify((s, qp, beta0), qpdot, modules="numpy"))
         return qpdot
 
     def solve(self, qp0, s_span=None, ivp_opt={}, backtrack=False, beta0=1):

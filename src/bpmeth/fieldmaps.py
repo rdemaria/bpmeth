@@ -369,7 +369,7 @@ class Fieldmap:
         
         integrals = np.zeros(order)
         for i in range(order):
-            integrals[i] = np.trapezoid(coeffs[:,i][mask], zvals[mask])
+            integrals[i] = np.trapz(coeffs[:,i][mask], zvals[mask])
         return integrals
 
 
@@ -385,7 +385,7 @@ class Fieldmap:
         zvals, coeffs, coeffsstd = self.z_multipoles(2)
         b1 = coeffs[:, 0]
 
-        Fint = 1/gap * np.trapezoid(b1 * (b0 - b1) / b0**2, zvals)
+        Fint = 1/gap * np.trapz(b1 * (b0 - b1) / b0**2, zvals)
 
         return Fint
 
@@ -409,7 +409,7 @@ class Fieldmap:
         if entrance is False:
             b1 = b1[::-1]
 
-        K0 = 1/gap**2 * np.trapezoid((zvals) * (b0*np.heaviside(zvals, 0.5) - b1) / b0, zvals)
+        K0 = 1/gap**2 * np.trapz((zvals) * (b0*np.heaviside(zvals, 0.5) - b1) / b0, zvals)
 
         return K0
                
